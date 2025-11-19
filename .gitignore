@@ -1,0 +1,35 @@
+## Игнорировать бинарные файлы и сборки
+[Bb]in/
+[Oo]bj/
+[Oo]utput/
+
+## Файлы пакетов NuGet
+packages/
+*.nupkg
+NuGet.exe
+
+## Файлы кэшей и настроек IDE
+/.vs/
+/.vscode/
+/.idea/
+*.user
+*.suo
+*.userprefs
+*.cache
+*.pidb
+*.ncb
+
+## Файлы ReSharper и Rider
+/_ReSharper.Caches/
+*.sln.iml
+riderModule.iml
+
+## Файлы операционной системы
+Thumbs.db
+[Dd]esktop.ini
+
+## Файлы сборки
+*.log
+*.dll
+*.pdb
+*.exe
