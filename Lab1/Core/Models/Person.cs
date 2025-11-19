@@ -9,8 +9,25 @@ public class Person(string firstName, string lastName) : IEntity
     public string LastName { get; } = lastName;
     public bool IsTeacher => _teacherInfo is not null;
     public bool IsStudent => _studentInfo is not null;
+    public IReadOnlyList<Course> TaughtCourses
+    {
+        get
+        {
+            if (!IsTeacher)
+                throw new Exception("Person is not a teacher");
+            return _teacherInfo!.TaughtCourses;
+        }
+    }
+    public IReadOnlyList<Course> EnrolledCourses
+    {
+        get
+        {
+            if (!IsStudent)
+                throw new Exception("Person is not a student");
+            return _studentInfo!.EnrolledCourses;
+        }
+    }
 
-    
     private StudentProfile? _studentInfo;
     private TeacherProfile? _teacherInfo;
 
