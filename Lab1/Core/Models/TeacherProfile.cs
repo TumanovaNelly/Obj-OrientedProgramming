@@ -6,6 +6,10 @@ public class TeacherProfile(string department)
     public IReadOnlyList<Course> TaughtCourses => _taughtCourses.AsReadOnly();
     
     private readonly List<Course> _taughtCourses = [];
-    
-    public void AddTaughtCourse(Course course) => _taughtCourses.Add(course);
+
+    public void AddTaughtCourse(Course course)
+    {
+        if (!_taughtCourses.Contains(course))
+            _taughtCourses.Add(course);
+    }
 }

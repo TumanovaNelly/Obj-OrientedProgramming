@@ -7,5 +7,9 @@ public class StudentProfile(string group)
     
     private readonly List<Course> _enrolledCourses = [];
     
-    public void AddEnrolledCourse(Course course) => _enrolledCourses.Add(course);
+    public void AddEnrolledCourse(Course course) 
+    {
+        if (!_enrolledCourses.Contains(course))
+            _enrolledCourses.Add(course);
+    }
 }

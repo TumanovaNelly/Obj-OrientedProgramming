@@ -15,7 +15,6 @@ public class MainPage
     {
         _commands[Command.AC] = HandleAddCourse;
         _commands[Command.DC] = HandleDeleteCourse;
-        _commands[Command.AT] = HandleAssignTeacherToCourse;
         _commands[Command.CI] = HandleShowCourseInfo;
         _commands[Command.AP] = HandleAddPerson;
         _commands[Command.DP] = HandleDeletePerson;
@@ -28,7 +27,7 @@ public class MainPage
     public void Run()
     {
         _isRunning = true;
-        ConsoleOutput.ShowMenu("Меню админа", _commands.Keys.ToList());
+        ConsoleOutput.ShowMenu("Меню пользователя", _commands.Keys.ToList());
 
         while (_isRunning)
             ProcessCommand(_commands);
@@ -124,7 +123,11 @@ public class MainPage
     private void HandleAddCourse()
     {
         string title = ConsoleInput.ReadWord("Введите название курса: ");
-        _universityService.AddCourse(title);
+        var courseId = _universityService.AddCourse(title);
+        
+        if (!TryAssignTeacherToCourse(courseId))
+            _universityService.DeleteCourse(courseId);
+        
         ShowCourses();
     }
     
@@ -148,20 +151,13 @@ public class MainPage
         ShowCourses();
     }
     
-    private void HandleAssignTeacherToCourse()
+    private bool TryAssignTeacherToCourse(Guid courseId)
     {
-        ShowCourses();
-        if (!ConsoleInput.TryReadId("Введите ID курса: ", out var courseId))
-        {
-            ConsoleOutput.DisplayError("Неверный формат ID курса");
-            return;
-        }
-        
         ShowPersons();
         if (!ConsoleInput.TryReadId("Введите ID преподавателя: ", out var personId))
         {
             ConsoleOutput.DisplayError("Неверный формат ID преподавателя");
-            return;
+            return false;
         }
 
         try
@@ -171,9 +167,10 @@ public class MainPage
         catch (KeyNotFoundException exception)
         {
             ConsoleOutput.DisplayError(exception.Message);
+            return false;
         }
-        ShowCourseInfo(courseId);
         ShowPersonInfo(personId);
+        return true;
     }
 
     private void HandleShowCourseInfo()

@@ -14,8 +14,6 @@ public enum Command
     AP,  // add person
     [Description("Удалить человека")]
     DP,  // delete person
-    [Description("Назначить преподавателя на курс")]
-    AT,  // assign teacher to course
     [Description("Посмотреть информацию о пользователе")]
     PI,  // person information
     [Description("Записать студента на курс")]
