@@ -110,6 +110,7 @@ public static class PersonTest
 
             // Assert
             Assert.Null(exception);
+            Assert.Contains(_course, _person.EnrolledCourses);
         }
 
         [Fact]
@@ -123,6 +124,26 @@ public static class PersonTest
 
             // Assert
             Assert.Null(exception);
+            Assert.Contains(_course, _person.TaughtCourses);
+        }
+        
+        [Fact]
+        public void Should_AddSameCourseMultipleTimes_WhenCalledRepeatedly()
+        {
+            // Act
+            _person.PromoteToStudent("Gryffindor");
+            _person.PromoteToTeacher("Potions");
+
+            _person.AddEnrolledCourse(_course);
+            _person.AddEnrolledCourse(_course);
+            _person.AddTaughtCourse(_course);
+            _person.AddTaughtCourse(_course);
+            
+            // Assert
+            Assert.Single(_person.EnrolledCourses);
+            Assert.Contains(_course, _person.EnrolledCourses);
+            Assert.Single(_person.TaughtCourses);
+            Assert.Contains(_course, _person.TaughtCourses);
         }
     }
 }

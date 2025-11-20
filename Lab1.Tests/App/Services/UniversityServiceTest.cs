@@ -1,5 +1,4 @@
-﻿using Lab1.App.DTOs;
-using Moq;
+﻿using Moq;
 using Lab1.App.Services;
 using Lab1.Core.Interfaces;
 using Lab1.Core.Models;
@@ -17,6 +16,36 @@ public class UniversityServiceTests
     protected UniversityServiceTests()
     {
         _universityService = new UniversityService(_mockCourseRepo.Object, _mockPersonRepo.Object);
+    }
+    
+    public class AddMethods : UniversityServiceTests
+    {
+        [Fact]
+        public void AddPerson_Should_AddPersonToRepository()
+        {
+            // Arrange
+            const string firstName = "John";
+            const string lastName = "Doe";
+
+            // Act
+            _universityService.AddPerson(firstName, lastName);
+
+            // Assert
+            _mockPersonRepo.Verify(repo => repo.Add(It.IsAny<Person>()), Times.Once);
+        }
+        
+        [Fact]
+        public void AddCourse_Should_AddCourseToRepositoryAndReturnCorrectDto()
+        {
+            // Arrange
+            const string courseTitle = "Advanced TDD";
+            
+            // Act
+            _universityService.AddCourse(courseTitle);
+            
+            // Assert
+            _mockCourseRepo.Verify(repo => repo.Add(It.IsAny<Course>()), Times.Once);
+        }
     }
     
     public class AssignmentMethods : UniversityServiceTests
@@ -85,12 +114,16 @@ public class UniversityServiceTests
             _mockCourseRepo.Setup(repo => repo.GetAll()).Returns(courses);
 
             // Act
-            var resultDtos = _universityService.GetAllCoursesInfo();
+            var resultDto = _universityService.GetAllCoursesInfo().ToList();
 
             // Assert
-            Assert.Equal(2, resultDtos.Count);
-            Assert.Equal("Telepathy 101", resultDtos[0].Title);
-            Assert.Equal("Genetics 202", resultDtos[1].Title);
+            Assert.Equal(2, resultDto.Count);
+            Assert.Equal("Telepathy 101", resultDto[0].Title);
+            Assert.Null(resultDto[0].ResponsiblePerson); 
+            
+            Assert.Equal("Genetics 202", resultDto[1].Title);
+            Assert.NotNull(resultDto[1].ResponsiblePerson);
+            Assert.Equal(teacher.Id, resultDto[1].ResponsiblePerson!.Id);
         }
     }
 }
