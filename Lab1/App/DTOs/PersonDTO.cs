@@ -1,3 +1,16 @@
 ﻿namespace Lab1.App.DTOs;
 
-public record PersonDTO(Guid Id, string FirstName, string LastName, bool IsTeacher = false, bool IsStudent = false);
+public record PersonDto(Guid Id, string FirstName, string LastName, bool IsTeacher, bool IsStudent)
+{
+    public override string ToString()
+    {
+        List<string> statusList = [];
+        if (IsStudent)
+            statusList.Add("Студент");
+        if (IsTeacher)
+            statusList.Add("Преподаватель");
+        
+        string statuses = string.Join("|", statusList);
+        return $"{Id} {statuses} {FirstName} {LastName}";
+    } 
+}

@@ -6,22 +6,24 @@ namespace Lab1.App.Services;
 
 public class UniversityService(ICourseRepository courseRepository, IPersonRepository personRepository)
 {
-    private readonly ICourseRepository _coursesRepository = courseRepository;
-    private readonly IPersonRepository _personRepository = personRepository;
-
-    public CourseDTO CreateCourse(string title)
+    public Guid AddCourse(string title)
     {
         var course = new Course(title);
-        _coursesRepository.Add(course);
-        return new CourseDTO(course.Id, course.Title);
+        courseRepository.Add(course);
+        return course.Id;
     }
+    
+    public void DeleteCourse(Guid courseId) => courseRepository.Remove(courseId);
 
-    public PersonDTO CreatePerson(string firstName, string lastName)
+    public Guid AddPerson(string firstName, string lastName)
     {
         var person = new Person(firstName, lastName);
-        _personRepository.Add(person);
-        return new PersonDTO(person.Id, person.FirstName, person.LastName);
-    }
+        personRepository.Add(person);
+        return person.Id;
+    } 
+    
+    public void DeletePerson(Guid personId) => personRepository.Remove(personId);
+    
     public void PromotePersonToStudent(Guid personId, string group) 
         => GetPersonById(personId).PromoteToStudent(group);
     
@@ -45,12 +47,47 @@ public class UniversityService(ICourseRepository courseRepository, IPersonReposi
         student.AddEnrolledCourse(course);
         course.AddEnrolledPerson(student);
     }
-
-    public IEnumerable<CourseDTO> GetCourses() => _coursesRepository.GetAll()
-            .Select(course => new CourseDTO(course.Id, course.Title, course.ResponsiblePerson?.Id));
     
-    public IEnumerable<PersonDTO> GetPersons() => _personRepository.GetAll()
-        .Select(person => new PersonDTO(person.Id, person.FirstName, person.LastName, person.IsTeacher, person.IsStudent));
+    public List<PersonDto> GetAllPersonsInfo() => personRepository.GetAll()
+        .Select(GetPersonDto).ToList();
+
+    public PersonDetailedDto GetPersonDetailedInfo(Guid personId)
+    {
+        var person = GetPersonById(personId);
+        var generalInfo = GetPersonDto(person);
+        var enrolledCoursesInfo = 
+            person.IsStudent ? person.EnrolledCourses.Select(GetCourseDto).ToList() : null;
+        var taughtCoursesInfo = 
+            person.IsTeacher ? person.TaughtCourses.Select(GetCourseDto).ToList() : null;
+        return new PersonDetailedDto(generalInfo, enrolledCoursesInfo, taughtCoursesInfo);
+    }
+    
+    public List<CourseDto> GetAllCoursesInfo() => courseRepository.GetAll()
+        .Select(GetCourseDto).ToList();
+
+    public CourseDetailedDto GetCourseDetailedInfo(Guid courseId)
+    {
+        var course = GetCourseById(courseId);
+        var generalInfo = GetCourseDto(course);
+        var formatsInfo = course.Formats.Select(GetCourseFormatDto).ToList();
+        var enrolledPersonsInfo = course.EnrolledPersons.Select(GetPersonDto).ToList();
+        return new CourseDetailedDto(generalInfo, formatsInfo, enrolledPersonsInfo);
+    }
+    private PersonDto GetPersonDto(Person person) =>
+        new(person.Id, person.FirstName, person.LastName, person.IsTeacher, person.IsStudent);
+    
+    private CourseDto GetCourseDto(Course course) => new(course.Id, course.Title, 
+        course.ResponsiblePerson is not null ? GetPersonDto(course.ResponsiblePerson) : null );
+    
+    private CourseFormatDto GetCourseFormatDto(ICourseFormat format) => new(format.Place.Info, format.Time.Info);
+    
+    private Person GetPersonById(Guid personId)
+    {
+        var person = personRepository.GetById(personId);
+        if (person is null)
+            throw new KeyNotFoundException($"Person with ID:{personId} not found");
+        return person;
+    }
     
     private Person GetTeacherById(Guid teacherId)
     {
@@ -68,17 +105,9 @@ public class UniversityService(ICourseRepository courseRepository, IPersonReposi
         return student;
     }
     
-    private Person GetPersonById(Guid personId)
-    {
-        var person = _personRepository.GetById(personId);
-        if (person is null)
-            throw new KeyNotFoundException($"Person with ID:{personId} not found");
-        return person;
-    }
-    
     private Course GetCourseById(Guid courseId)
     {
-        var course = _coursesRepository.GetById(courseId);
+        var course = courseRepository.GetById(courseId);
         if (course is null)
             throw new KeyNotFoundException($"Course with ID:{courseId} not found");
         return course;

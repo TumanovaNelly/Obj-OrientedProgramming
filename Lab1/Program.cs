@@ -1,9 +1,12 @@
-﻿namespace Lab1;
+﻿using Lab1.UI.Pages;
+
+namespace Lab1;
 
 public static class Program
 {
     public static void Main()
     {
-        Console.Write("Hello World!");
+        var mainPage = new MainPage();
+        mainPage.Run();
     }
 }

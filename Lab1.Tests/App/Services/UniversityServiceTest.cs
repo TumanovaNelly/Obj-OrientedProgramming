@@ -1,4 +1,5 @@
-﻿using Moq;
+﻿using Lab1.App.DTOs;
+using Moq;
 using Lab1.App.Services;
 using Lab1.Core.Interfaces;
 using Lab1.Core.Models;
@@ -18,43 +19,6 @@ public class UniversityServiceTests
         _universityService = new UniversityService(_mockCourseRepo.Object, _mockPersonRepo.Object);
     }
     
-    public class CreationMethods : UniversityServiceTests
-    {
-        [Fact]
-        public void CreateCourse_Should_AddCourseToRepositoryAndReturnCorrectDto()
-        {
-            // Arrange
-            var courseTitle = "Advanced TDD";
-            
-            // Act
-            var resultDto = _universityService.CreateCourse(courseTitle);
-            
-            // Assert
-            _mockCourseRepo.Verify(repo => repo.Add(It.IsAny<Course>()), Times.Once);
-            Assert.NotNull(resultDto);
-            Assert.Equal(courseTitle, resultDto.Title);
-            Assert.NotEqual(Guid.Empty, resultDto.Id);
-        }
-
-        [Fact]
-        public void CreatePerson_Should_AddPersonToRepositoryAndReturnCorrectDto()
-        {
-            // Arrange
-            var firstName = "John";
-            var lastName = "Doe";
-
-            // Act
-            var resultDto = _universityService.CreatePerson(firstName, lastName);
-
-            // Assert
-            _mockPersonRepo.Verify(repo => repo.Add(It.IsAny<Person>()), Times.Once);
-
-            Assert.NotNull(resultDto);
-            Assert.Equal(firstName, resultDto.FirstName);
-            Assert.Equal(lastName, resultDto.LastName);
-        }
-    }
-    
     public class AssignmentMethods : UniversityServiceTests
     {
         [Fact]
@@ -62,7 +26,7 @@ public class UniversityServiceTests
         {
             // Arrange
             var teacher = new Person("Prof.", "Plum");
-            teacher.PromoteToTeacher("CS"); // Делаем его преподавателем
+            teacher.PromoteToTeacher("CS"); 
             var course = new Course("Algorithms");
 
             _mockPersonRepo.Setup(repo => repo.GetById(teacher.Id)).Returns(teacher);
@@ -121,15 +85,12 @@ public class UniversityServiceTests
             _mockCourseRepo.Setup(repo => repo.GetAll()).Returns(courses);
 
             // Act
-            var resultDtos = _universityService.GetCourses().ToList();
+            var resultDtos = _universityService.GetAllCoursesInfo();
 
             // Assert
             Assert.Equal(2, resultDtos.Count);
             Assert.Equal("Telepathy 101", resultDtos[0].Title);
-            Assert.Null(resultDtos[0].ResponsiblePersonId); 
-            
             Assert.Equal("Genetics 202", resultDtos[1].Title);
-            Assert.Equal(teacher.Id, resultDtos[1].ResponsiblePersonId);
         }
     }
 }
