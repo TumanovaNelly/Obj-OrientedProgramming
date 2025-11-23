@@ -2,7 +2,7 @@
 
 namespace Lab2.Core.Interfaces;
 
-public interface IPlayer
+public interface IPlayer : IUpgradable
 {
     public string Name { get; }
     public IScale Health { get; }
@@ -10,7 +10,7 @@ public interface IPlayer
     public bool IsAlive { get; }
     public bool TryPickUpItem(IItem item);
     public bool TryDropItem(Guid itemId, out IItem? item);
-    public void InteractWithItem(Guid itemId);
+    public bool TryInteractWithItem(Guid itemId);
     public bool TryUnEquipItemToInventory(EquipmentSlot slot);
     public bool TryEquipItemFromInventory(Guid itemId, EquipmentSlot targetSlot);
     public void TakeDamage(int damage);

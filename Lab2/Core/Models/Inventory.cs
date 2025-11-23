@@ -5,7 +5,7 @@ namespace Lab2.Core.Models;
 
 public class Inventory(int maxCapacity) : IInventory
 {
-    public IScale Capacity { get; set; } = new Scale(maxCapacity, 0);
+    public IScale Capacity { get; } = new Scale(maxCapacity, 0);
     
     public IReadOnlyDictionary<Guid, IItem> Items => 
         new ReadOnlyDictionary<Guid, IItem>(_items);
@@ -31,5 +31,5 @@ public class Inventory(int maxCapacity) : IInventory
         return true;
     }
 
-    public IItem? GetItem(Guid id) => _items.TryGetValue(id, out var item) ? (Item?)item : null;
+    public bool TryGetItem(Guid id, out IItem? item) => _items.TryGetValue(id, out item);
 }
