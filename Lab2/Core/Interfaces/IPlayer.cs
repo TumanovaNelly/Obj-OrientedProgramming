@@ -2,7 +2,7 @@
 
 namespace Lab2.Core.Interfaces;
 
-public interface IPlayer : IUpgradable
+public interface IPlayer
 {
     public string Name { get; }
     public int BaseDamage { get; }

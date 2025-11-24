@@ -2,7 +2,7 @@
 
 namespace Lab2.Core.Models;
 
-public class ConsumeStrategy(int healAmount) : IItemUseStrategy
+public class HealStrategy(int healAmount) : IItemUseStrategy
 {
     public void Use(IPlayer player, IItem item)
     {
