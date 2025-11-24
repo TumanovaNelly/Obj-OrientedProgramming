@@ -2,10 +2,14 @@
 
 namespace Lab2.Core.Models;
 
-public class Scale(int maxValue, int currentValue) : IScale
+public class Scale(int maxValue, int currentValue) 
 {
     public int MaxValue { get; private set; } = maxValue;
     public int CurrentValue { get; private set; } = currentValue;
+    
+    public bool IsOver => CurrentValue == 0;
+    public bool IsComplete => CurrentValue == MaxValue;
+    
 
     public void Increment(int amount)
     {

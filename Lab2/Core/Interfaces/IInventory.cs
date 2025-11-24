@@ -2,7 +2,6 @@
 
 public interface IInventory
 {
-    public IScale Capacity { get; }
     public IReadOnlyDictionary<Guid, IItem> Items { get; }
     
     public bool TryAdd(IItem item);

@@ -14,12 +14,12 @@ public class EquipmentManager : IEquipmentManager
     
     public IEquippableItem? Equip(EquipmentSlot slot, IEquippableItem item)
     {
-        var oldItem = Unequip(slot);
+        var oldItem = UnEquip(slot);
         _equipped[slot] = item;
         return oldItem;
     }
 
-    public IEquippableItem? Unequip(EquipmentSlot slot)
+    public IEquippableItem? UnEquip(EquipmentSlot slot)
     {
         var oldItem = _equipped[slot];
         _equipped[slot] = null;

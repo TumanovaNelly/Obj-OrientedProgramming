@@ -6,7 +6,7 @@ public class ConsumeStrategy(int healAmount) : IItemUseStrategy
 {
     public void Use(IPlayer player, IItem item)
     {
-        player.Health.Increment(healAmount);
+        player.Heal(healAmount);
         player.TryDropItem(item.Id, out _);
     }
 }

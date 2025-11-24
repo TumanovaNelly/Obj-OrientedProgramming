@@ -7,10 +7,11 @@ public class Player(string name, int maxHealth, int baseDamage,
     IInventory inventory, IEquipmentManager equipmentManager) : IPlayer
 {
     public string Name { get; } = name;
-    public IScale Health { get; private set; } = new Scale(maxHealth, maxHealth);
     public int BaseDamage { get; private set; } = baseDamage;
-    public bool IsAlive => !Health.IsOver;
-
+    public bool IsAlive => !_health.IsOver;
+    
+    private readonly Scale _health = new(maxHealth, maxHealth);
+    
     public bool TryPickUpItem(IItem item) => IsAlive && inventory.TryAdd(item);
 
     public bool TryDropItem(Guid itemId, out IItem? item)
@@ -29,11 +30,28 @@ public class Player(string name, int maxHealth, int baseDamage,
         return true;
     }
 
+    public bool TryEquipItemFromInventory(Guid itemId)
+    {
+        if (!IsAlive)
+            return false;
+        if (!inventory.TryRemove(itemId, out var item) || item is not IEquippableItem equippedItem)
+            return false;
+
+        var oldItem = equipmentManager.Equip(equippedItem.EquipSlot, equippedItem);
+
+        if (oldItem is null || inventory.TryAdd(oldItem)) 
+            return true;
+        
+        equipmentManager.Equip(oldItem.EquipSlot, oldItem);
+        inventory.TryAdd(item);
+        return false;
+    }
+    
     public bool TryUnEquipItemToInventory(EquipmentSlot slot)
     {
         if (!IsAlive) 
             return false;
-        var unequippedItem = equipmentManager.Unequip(slot);
+        var unequippedItem = equipmentManager.UnEquip(slot);
         if (unequippedItem is null)
             return false;
 
@@ -44,31 +62,16 @@ public class Player(string name, int maxHealth, int baseDamage,
         return false;
     }
 
-    public bool TryEquipItemFromInventory(Guid itemId, EquipmentSlot targetSlot)
-    {
-        if (!IsAlive)
-            return false;
-        if (!inventory.TryRemove(itemId, out var item) || item is not IEquippableItem equippedItem)
-            return false;
-
-        var oldItem = equipmentManager.Equip(targetSlot, equippedItem);
-
-        if (oldItem is null || inventory.TryAdd(oldItem)) 
-            return true;
-        
-        equipmentManager.Equip(targetSlot, oldItem);
-        inventory.TryAdd(item);
-        return false;
-    }
-
     public void TakeDamage(int damage)
     {
         var totalDefense = equipmentManager.Equipped.Values.OfType<IDefenseProvider>()
             .Sum(x => x.DefenseValue);
 
         int actualDamage = Math.Max(0, damage - totalDefense);
-        Health.Decrement(actualDamage);
+        _health.Decrement(actualDamage);
     }
+
+    public void Heal(int healAmount) => _health.Increment(healAmount);
 
     public void Attack(IPlayer target)
     {
@@ -83,6 +86,6 @@ public class Player(string name, int maxHealth, int baseDamage,
     public void Upgrade()
     {
         BaseDamage = (int)(BaseDamage * 1.5);
-        Health.IncreaseMaxValue(20);
+        _health.IncreaseMaxValue(20);
     }
 }
