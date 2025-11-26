@@ -6,20 +6,24 @@ namespace Lab2.Core.Models;
 public class Player : IPlayer
 {
     public string Name { get; }
-    public int BaseDamage { get; private set; }
+    public int CurrentHealth => _health.CurrentValue;
+    public int MaxHealth => _health.MaxValue;
     public bool IsAlive => !_health.IsOver;
+    public int CurrentLevel => _experience.Level;
+    public int CurrentXp => _experience.CurrentXp;
+    public int XpToNextLevel => _experience.XpToNextLevel;
 
+    private int _baseDamage;
     private readonly Scale _health;
     private readonly ExperienceSystem _experience = new();
     private readonly IInventory _inventory;
     private readonly IEquipmentManager _equipmentManager;
-    
 
     public Player(string name, int maxHealth, int baseDamage, IInventory inventory, IEquipmentManager equipmentManager)
     {
         Name = name;
-        BaseDamage = baseDamage;
         
+        _baseDamage = baseDamage;
         _health= new Scale(maxHealth, maxHealth);
         _experience.OnLevelUp += Upgrade;
         _inventory = inventory;
@@ -30,7 +34,8 @@ public class Player : IPlayer
 
     public bool TryDropItem(Guid itemId, out IItem? item)
     {
-        if (!IsAlive) return _inventory.TryRemove(itemId, out item);
+        if (IsAlive) 
+            return _inventory.TryRemove(itemId, out item);
         item = null;
         return false;
     }
@@ -39,17 +44,24 @@ public class Player : IPlayer
     {
         if (!IsAlive || !_inventory.TryGetItem(itemId, out var item)) 
             return false;
+
+        if (item is null) 
+            throw new KeyNotFoundException();
         
-        item!.UseStrategy.Use(this, item);
+        item.UseStrategy.Use(this, item);
         return true;
     }
 
     public bool TryEquipItemFromInventory(Guid itemId)
     {
-        if (!IsAlive)
+        if (!IsAlive || !_inventory.TryRemove(itemId, out var item) || item is null)
             return false;
-        if (!_inventory.TryRemove(itemId, out var item) || item is not IEquippableItem equippedItem)
+        
+        if (item is not IEquippableItem equippedItem)
+        {
+            _inventory.TryAdd(item);
             return false;
+        }
 
         var oldItem = _equipmentManager.Equip(equippedItem.EquipSlot, equippedItem);
 
@@ -92,14 +104,20 @@ public class Player : IPlayer
         if (!IsAlive)
             return;
         int damage = _equipmentManager.Equipped.Values.OfType<IDamageProvider>()
-            .Sum(x => x.DamageValue) + BaseDamage;
+            .Sum(x => x.DamageValue) + _baseDamage;
 
         target.TakeDamage(damage);
     }
 
+    public int AddXp(int xp)
+    {
+        _experience.AddXp(xp);
+        return _experience.Level;
+    }
+
     private void Upgrade(int newLevel)
     {
-        BaseDamage += 10;
+        _baseDamage += 10;
         _health.IncreaseMaxValue(10);
     }
 }
