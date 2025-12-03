@@ -5,7 +5,7 @@ namespace Lab3.Core.Models;
 public class ScoresDiscount(decimal scoresAmount) : IDiscount
 {
     public decimal CalculateBenefit(decimal price) 
-        => decimal.Min(price * 0.5m, scoresAmount);
+        => scoresAmount;
 }
 
 public class PercentDiscount : IDiscount
@@ -23,3 +23,5 @@ public class PercentDiscount : IDiscount
     public decimal CalculateBenefit(decimal price) 
         => price * _percent / 100;
 }
+
+
