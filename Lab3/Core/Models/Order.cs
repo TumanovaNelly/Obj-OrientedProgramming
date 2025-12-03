@@ -1,47 +1,35 @@
-﻿using Lab3.Core.Enums;
-using Lab3.Core.Interfaces;
+﻿using Lab3.Core.Interfaces;
+using Lab3.Helpers;
 
 namespace Lab3.Core.Models;
 
-public class Order(DateTime date)
+public class Order(IEnumerable<Item> items, OrderPrice price)
 {
     public Guid Id { get; } = Guid.NewGuid();
-    public DateTime CreatedAt { get; } = DateTime.UtcNow;
-    public bool IsGiftWrapped { get; init; } = false;
-    public bool IsExpressDelivery { get; init; } = false;
-    public OrderStatus Status => _state.StatusName;
-    public IReadOnlyCollection<Item> Items => _items.AsReadOnly();
+    public DateTime CreatedAt { get; } = DateTime.Now;
+    public OrderPrice Price { get; init; } = price;
+    public string? Status => _state.ToString();
     
-    private readonly List<Item> _items = [];
-    private IOrderState _state = new CreatedState();
-
-    public void AddItem(Item item)
-    {
-        if (_state is not CreatedState)
-            throw new InvalidOperationException("Invalid state of order");
-        
-        _items.Add(item);
-    }
-
-    public void Proceed()
-    {
+    private IOrderState _state = new AwaitingPaymentState();
+    private readonly List<Item> _items = items.ToList();
+    
+    public void Proceed() => 
         _state.ProceedToNext(this);
-    }
-
-    public void Cancel()
-    {
+    
+    public void Cancel() => 
         _state.Cancel(this);
-    }
 
-    public decimal GetTotalCost(IPricingStrategy pricingStrategy)
+    public string GetCheque()
     {
-        return _items.Count == 0 ? 0 : pricingStrategy.Calculate(this);
+        List<string> lines = [];
+        lines.Add(Output.WordInMiddle(" ЧЕК "));
+        lines.AddRange(_items.Select(item => item.ToString()));
+        lines.Add(Output.Fill());
+        lines.Add(Price.ToString());
+        lines.Add(Output.Fill('='));
+        return string.Join(Environment.NewLine, lines);
     }
     
-    public decimal SubTotal => _items.Sum(x => x.Price * x.Count);
-
-    internal void ChangeState(IOrderState newState)
-    {
+    internal void ChangeState(IOrderState newState) => 
         _state = newState;
-    }
 }

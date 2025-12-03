@@ -1,17 +1,21 @@
-﻿namespace Lab3.Core.Models;
+﻿using System.Globalization;
+using Lab3.Helpers;
+
+namespace Lab3.Core.Models;
 
 public class Item
 {
     public Guid Id { get; } = Guid.NewGuid();
     public string Name { get; } 
-    public decimal Price
+    public int UnitWeight { get; }
+    public decimal UnitPrice
     {
-        get => _price;
+        get => _unitPrice;
         set
         {
             if (value < 0)
                 throw new ArgumentException("Price cannot be negative");
-            _price = value;
+            _unitPrice = value;
         }
     }
     
@@ -25,14 +29,20 @@ public class Item
             _count = value;
         }
     }
+    public decimal TotalPrice => UnitPrice * Count;
+    public int TotalWeight => UnitWeight * Count;
 
-    private decimal _price;
+    private decimal _unitPrice;
     private int _count;
 
-    public Item(string name, decimal price, int count)
+    public Item(string name, int unitWeight, decimal unitPrice, int count)
     {
         Name = name;
-        Price = price;
+        UnitWeight = unitWeight;
+        UnitPrice = unitPrice;
         Count = count;
     }
+
+    public override string ToString()
+        => Output.MiddleFill($"{Name} (x{Count})", UnitPrice.ToString(CultureInfo.InvariantCulture));
 }

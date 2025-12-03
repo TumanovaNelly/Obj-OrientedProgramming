@@ -1,0 +1,31 @@
+﻿using Lab3.Core.Interfaces;
+
+namespace Lab3.Core.Models;
+
+public class ShoppingCart
+{
+    public IReadOnlyCollection<Item> Items => _items.Values.ToList().AsReadOnly();
+    public decimal ItemsPrice => _items.Values.Sum(x => x.TotalPrice);
+    public decimal ItemsWeight => _items.Values.Sum(x => x.TotalWeight);
+    
+    private readonly Dictionary<Guid, Item> _items = new();
+
+
+    public void AddItem(Item item)
+    {
+        if (!_items.TryAdd(item.Id, item))
+            ++_items[item.Id].Count;
+        else _items[item.Id] = item;
+    }
+
+    public void RemoveItem(Guid itemId)
+    {
+        if (!_items.TryGetValue(itemId, out var item))
+            throw new KeyNotFoundException("Item not found");
+        if (item.Count > 0)
+            --item.Count;
+        else _items.Remove(itemId);
+    }
+
+    public OrderBuilder CreateOrder() => new(this);
+}

@@ -6,6 +6,7 @@ namespace Lab3.Core.Interfaces;
 public interface IOrderState
 {
     public OrderStatus StatusName { get; }
+    public DateTime SetAt { get; }
     public void ProceedToNext(Order order);
     public void Cancel(Order order);
 }
