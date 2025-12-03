@@ -7,7 +7,6 @@ public class Order(IEnumerable<Item> items, OrderPrice price)
 {
     public Guid Id { get; } = Guid.NewGuid();
     public DateTime CreatedAt { get; } = DateTime.Now;
-    public OrderPrice Price { get; init; } = price;
     public string? Status => _state.ToString();
     
     private IOrderState _state = new AwaitingPaymentState();
@@ -25,7 +24,7 @@ public class Order(IEnumerable<Item> items, OrderPrice price)
         lines.Add(Output.WordInMiddle(" ЧЕК "));
         lines.AddRange(_items.Select(item => item.ToString()));
         lines.Add(Output.Fill());
-        lines.Add(Price.ToString());
+        lines.Add(price.ToString());
         lines.Add(Output.Fill('='));
         return string.Join(Environment.NewLine, lines);
     }
