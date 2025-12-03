@@ -5,5 +5,5 @@ namespace Lab3.Core.Interfaces;
 public interface IReceiptMethod
 {
     public string Address { get; }
-    public decimal CalculatePrice(ShoppingCart cart);
+    public decimal CalculatePrice(decimal weight, decimal price);
 }

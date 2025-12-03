@@ -9,7 +9,7 @@ public class BasicPriceCalculator(IDiscountsCalculator discountsCalculator, ITax
         IEnumerable<IDiscount> discounts, IEnumerable<ITax> taxes)
     {
         var itemsPrice = cart.ItemsPrice;
-        var deliveryCost = receiptMethod.CalculatePrice(cart);
+        var deliveryCost = receiptMethod.CalculatePrice(cart.ItemsWeight, cart.ItemsPrice);
         var withDeliveryPrice = itemsPrice + deliveryCost;
         var discountsAmount = discountsCalculator.CalculateTotalDiscountAmount(withDeliveryPrice, discounts);
         var withDiscountAmount = withDeliveryPrice - discountsAmount;
