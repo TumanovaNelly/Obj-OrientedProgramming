@@ -5,20 +5,7 @@ namespace Lab3.Core.Models;
 
 public class Item
 {
-    public Guid Id { get; } = Guid.NewGuid();
-    public string Name { get; } 
-    public int UnitWeight { get; }
-    public decimal UnitPrice
-    {
-        get => _unitPrice;
-        set
-        {
-            if (value < 0)
-                throw new ArgumentException("Price cannot be negative");
-            _unitPrice = value;
-        }
-    }
-    
+    public Guid ProductId => _product.Id;
     public int Count
     {
         get => _count;
@@ -29,20 +16,20 @@ public class Item
             _count = value;
         }
     }
-    public decimal TotalPrice => UnitPrice * Count;
-    public int TotalWeight => UnitWeight * Count;
 
-    private decimal _unitPrice;
+    public decimal TotalPrice => _product.Price * Count;
+    public int TotalWeight => _product.Weight * Count;
+
+    private readonly Product _product;
     private int _count;
 
-    public Item(string name, int unitWeight, decimal unitPrice, int count)
+    public Item(Product product, int count)
     {
-        Name = name;
-        UnitWeight = unitWeight;
-        UnitPrice = unitPrice;
+        _product = product;
         Count = count;
     }
 
     public override string ToString()
-        => Output.MiddleFill($"{Name} (x{Count})", UnitPrice.ToString(CultureInfo.InvariantCulture));
+        => Output.MiddleFill($"{_product.Name} (x{Count})", 
+            _product.Price.ToString(CultureInfo.InvariantCulture));
 }

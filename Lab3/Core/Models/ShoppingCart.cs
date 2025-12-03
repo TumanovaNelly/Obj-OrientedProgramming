@@ -1,6 +1,4 @@
-﻿using Lab3.Core.Interfaces;
-
-namespace Lab3.Core.Models;
+﻿namespace Lab3.Core.Models;
 
 public class ShoppingCart
 {
@@ -13,9 +11,9 @@ public class ShoppingCart
 
     public void AddItem(Item item)
     {
-        if (!_items.TryAdd(item.Id, item))
-            ++_items[item.Id].Count;
-        else _items[item.Id] = item;
+        if (!_items.TryAdd(item.ProductId, item))
+            ++_items[item.ProductId].Count;
+        else _items[item.ProductId] = item;
     }
 
     public void RemoveItem(Guid itemId)
