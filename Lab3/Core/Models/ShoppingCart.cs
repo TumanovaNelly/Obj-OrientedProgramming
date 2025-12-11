@@ -11,8 +11,10 @@ public class ShoppingCart
 
     public void AddItem(Item item)
     {
+        if (item.Count == 0)
+            throw new InvalidOperationException("Cannot add empty item to a shopping cart");
         if (!_items.TryAdd(item.ProductId, item))
-            ++_items[item.ProductId].Count;
+            _items[item.ProductId].Count += item.Count;
         else _items[item.ProductId] = item;
     }
 
@@ -20,9 +22,9 @@ public class ShoppingCart
     {
         if (!_items.TryGetValue(itemId, out var item))
             throw new KeyNotFoundException("Item not found");
-        if (item.Count > 0)
-            --item.Count;
-        else _items.Remove(itemId);
+        --item.Count;
+        if (item.Count == 0)
+            _items.Remove(itemId);
     }
 
     public OrderBuilder CreateOrder() => new(this);
