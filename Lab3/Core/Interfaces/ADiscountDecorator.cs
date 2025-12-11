@@ -1,13 +1,6 @@
 ﻿namespace Lab3.Core.Interfaces;
 
-public abstract class ADiscountDecorator : IDiscount
+public abstract class ADiscountDecorator(IDiscount discount) : IDiscount
 {
-    private readonly IDiscount _discount;
-
-    public ADiscountDecorator(IDiscount discount)
-    {
-        _discount = discount;
-    }
-    
-    public virtual decimal CalculateBenefit(decimal price) => _discount.CalculateBenefit(price);
+    public virtual decimal CalculateBenefit(decimal price) => discount.CalculateBenefit(price);
 }
