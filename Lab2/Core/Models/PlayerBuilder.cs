@@ -6,6 +6,7 @@ public class PlayerBuilder
 {
     private IWeaponManager? _weaponManager;
     private IProtectionManager? _protectionManager;
+    private IInventory? _inventory;
     private IScale? _healthScale;
     private int? _baseDamage;
 
@@ -18,6 +19,12 @@ public class PlayerBuilder
     public PlayerBuilder SetProtectionManager(IProtectionManager protectionManager)
     {
         _protectionManager = protectionManager;
+        return this;
+    }
+    
+    public PlayerBuilder SetInventory(IInventory inventory)
+    {
+        _inventory = inventory;
         return this;
     }
     
@@ -44,12 +51,15 @@ public class PlayerBuilder
         if (_protectionManager is null)
             throw new InvalidOperationException("Protection manager is not set");
         
+        if (_inventory is null)
+            throw new InvalidOperationException("Inventory is not set");
+        
         if (_healthScale is null)
             throw new InvalidOperationException("Health scale is not set");
         
         if (_baseDamage is null)
-            throw new InvalidOperationException("Base damage cannot be negative");
+            throw new InvalidOperationException("Base damage is not set");
         
-        return new Player((int)_baseDamage, _weaponManager, _protectionManager, _healthScale);
+        return new Player((int)_baseDamage, _weaponManager, _protectionManager, _inventory, _healthScale);
     }
 }

@@ -4,10 +4,13 @@ namespace Lab2.Core.Interfaces;
 
 public interface ICharacter
 {
-    public void Attack(PlayerInGame targetPlayer);
+    public bool IsAlive { get; }
+    public int CurrentHealth { get; }
+    public int MaxHealth { get; }
+    public void Attack(ICharacter targetPlayer);
     public void TakeDamage(int damage);
-    public void TakeWeapon(IWeapon weapon, out IItem? oldItem);
-    public void EquipProtection(IProtection protection, out IItem? oldItem);
+    public bool TryTakeWeapon(IWeapon weapon);
+    public bool TryEquipProtection(IProtection protection);
     public void Heal(int heal);
 
 }

@@ -5,21 +5,45 @@ namespace Lab2.Core.Models;
 
 public class Player( 
     int baseDamage, 
-    IWeaponManager weaponManager, IProtectionManager protectionManager,
+    IWeaponManager weaponManager, IProtectionManager protectionManager, IInventory inventory,
     IScale healthScale
     ) : ICharacter
 {
     public bool IsAlive => !healthScale.IsEmpty;
+    
+    private readonly IInventory _inventory = inventory;
     public int CurrentHealth => healthScale.CurrentValue;
     public int MaxHealth => healthScale.MaxValue;
     public int BaseDamage { get; } = baseDamage;
     
-    public void Attack(PlayerInGame targetPlayer)
+    public bool TryPickUpItem(IItem item) => IsAlive && _inventory.TryAdd(item);
+
+    public bool TryDropItem(Guid itemId, out IItem? item)
+    {
+        item = null;
+        return IsAlive && _inventory.TryRemove(itemId, out item);
+    }
+    
+    public bool TryUseItem(Guid itemId)
+    {
+        if (!IsAlive || 
+            !_inventory.TryGetItem(itemId, out IItem? item) || item is null) 
+            return false;
+        
+        if (!_inventory.TryRemove(itemId, out var oldItem) || oldItem is null) 
+            return false;
+
+        if (!item.UseByPlayer(this))
+            _inventory.TryAdd(oldItem);
+        return true;
+    }
+    
+    public void Attack(ICharacter targetCharacter)
     {
         if (!IsAlive)
             return;
 
-        targetPlayer.TakeDamage(BaseDamage + weaponManager.TotalDamage);
+        targetCharacter.TakeDamage(BaseDamage + weaponManager.TotalDamage);
     }
     
     public void TakeDamage(int damage)
@@ -39,27 +63,43 @@ public class Player(
         healthScale.Increment(heal);
     }
     
-    public void TakeWeapon(IWeapon weapon, out IItem? oldItem)
+    public bool TryTakeWeapon(IWeapon weapon)
     {
         weaponManager.TakeWeapon(weapon, out var oldWeapon);
-        oldItem = oldWeapon ?? null;
+        if (oldWeapon is null || _inventory.TryAdd(oldWeapon))
+            return true;
+        
+        weaponManager.TakeWeapon(oldWeapon, out _);
+        return false;
     }
     
-    public void LayDownWeapon(out IItem? oldItem)
+    public bool TryLayDownWeapon()
     {
         weaponManager.LayDownWeapon(out var oldWeapon);
-        oldItem = oldWeapon ?? null;
+        if (oldWeapon is null || _inventory.TryAdd(oldWeapon))
+            return true;
+        
+        weaponManager.TakeWeapon(oldWeapon, out _);
+        return false;
     }
 
-    public void EquipProtection(IProtection protection, out IItem? oldItem)
+    public bool TryEquipProtection(IProtection protection)
     {
         protectionManager.EquipProtection(protection, out var oldProtection);
-        oldItem = oldProtection ?? null;
+        if (oldProtection is null || _inventory.TryAdd(oldProtection))
+            return true;
+        
+        protectionManager.EquipProtection(oldProtection, out _);
+        return false;
     }
 
-    public void UnEquipProtection(ProtectionSlot slot, out IItem? oldItem)
+    public bool TryUnEquipProtection(ProtectionSlot slot)
     {
         protectionManager.UnEquipProtection(slot, out var oldProtection);
-        oldItem = oldProtection ?? null;
+        if (oldProtection is null || _inventory.TryAdd(oldProtection))
+            return true;
+        
+        protectionManager.EquipProtection(oldProtection, out _);
+        return false;
     }
 }
