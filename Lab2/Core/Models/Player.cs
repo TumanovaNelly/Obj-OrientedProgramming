@@ -56,9 +56,11 @@ public class Player : ICharacter
         if (!_inventory.TryRemove(itemId, out var oldItem) || oldItem is null) 
             return false;
 
-        if (!item.UseByPlayer(this))
-            _inventory.TryAdd(oldItem);
-        return true;
+        if (item.UseByPlayer(this))
+            return true;
+        
+        _inventory.TryAdd(oldItem);
+        return false;
     }
     
     public void Attack(ICharacter targetCharacter)
