@@ -8,6 +8,7 @@ public class PlayerBuilder
     private IProtectionManager? _protectionManager;
     private IInventory? _inventory;
     private IScale? _healthScale;
+    private IExperienceSystem? _experienceSystem; 
     private int? _baseDamage;
 
     public PlayerBuilder SetWeaponManager(IWeaponManager weaponManager)
@@ -34,6 +35,12 @@ public class PlayerBuilder
         return this;
     }
     
+    public PlayerBuilder SetExperienceSystem(IExperienceSystem experienceSystem)
+    {
+        _experienceSystem = experienceSystem;
+        return this;
+    }
+    
     public PlayerBuilder SetBaseDamage(int baseDamage)
     {
         if (_baseDamage < 0)
@@ -57,9 +64,14 @@ public class PlayerBuilder
         if (_healthScale is null)
             throw new InvalidOperationException("Health scale is not set");
         
+        if (_experienceSystem is null)
+            throw new InvalidOperationException("Experience system is not set");
+        
         if (_baseDamage is null)
             throw new InvalidOperationException("Base damage is not set");
         
-        return new Player((int)_baseDamage, _weaponManager, _protectionManager, _inventory, _healthScale);
+        return new Player((int)_baseDamage, 
+            _weaponManager, _protectionManager, _inventory, 
+            _healthScale, _experienceSystem);
     }
 }

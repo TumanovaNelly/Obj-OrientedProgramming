@@ -3,18 +3,41 @@ using Lab2.Core.Interfaces;
 
 namespace Lab2.Core.Models;
 
-public class Player( 
-    int baseDamage, 
-    IWeaponManager weaponManager, IProtectionManager protectionManager, IInventory inventory,
-    IScale healthScale
-    ) : ICharacter
+public class Player : ICharacter
 {
-    public bool IsAlive => !healthScale.IsEmpty;
+    public bool IsAlive => !_healthScale.IsEmpty;
+    public int CurrentHealth => _healthScale.CurrentValue;
+    public int MaxHealth => _healthScale.MaxValue;
     
-    private readonly IInventory _inventory = inventory;
-    public int CurrentHealth => healthScale.CurrentValue;
-    public int MaxHealth => healthScale.MaxValue;
-    public int BaseDamage { get; } = baseDamage;
+    public int BaseDamage { get; private set; }
+    
+    public int Level => _experienceSystem.Level;
+    public int CurrentXp => _experienceSystem.CurrentExperience;
+    public int ToNextLevelXp => _experienceSystem.ToNextLevelExperience;
+
+    private readonly IWeaponManager _weaponManager;
+    private readonly IProtectionManager _protectionManager;
+    private readonly IInventory _inventory;
+    
+    private readonly IScale _healthScale;
+    private readonly IExperienceSystem _experienceSystem;
+
+    public Player(
+        int baseDamage,
+        IWeaponManager weaponManager, IProtectionManager protectionManager, IInventory inventory,
+        IScale healthScale,
+        IExperienceSystem experienceSystem
+    )
+    {
+        BaseDamage = baseDamage;
+        _weaponManager = weaponManager;
+        _protectionManager = protectionManager;
+        _inventory = inventory;
+        _healthScale = healthScale;
+        _experienceSystem = experienceSystem;
+        _experienceSystem.OnLevelUp += Upgrade;
+    }
+    
     
     public bool TryPickUpItem(IItem item) => IsAlive && _inventory.TryAdd(item);
 
@@ -43,7 +66,8 @@ public class Player(
         if (!IsAlive)
             return;
 
-        targetCharacter.TakeDamage(BaseDamage + weaponManager.TotalDamage);
+        AddXp(10);
+        targetCharacter.TakeDamage(BaseDamage + _weaponManager.TotalDamage);
     }
     
     public void TakeDamage(int damage)
@@ -51,8 +75,8 @@ public class Player(
         if (!IsAlive)
             return;
         
-        var totalDamage = int.Max(0, damage - protectionManager.TotalProtection);
-        healthScale.Decrement(totalDamage);
+        var totalDamage = int.Max(0, damage - _protectionManager.TotalProtection);
+        _healthScale.Decrement(totalDamage);
     }
 
     public void Heal(int heal)
@@ -60,46 +84,55 @@ public class Player(
         if (!IsAlive)
             return;
         
-        healthScale.Increment(heal);
+        _healthScale.Increment(heal);
     }
     
     public bool TryTakeWeapon(IWeapon weapon)
     {
-        weaponManager.TakeWeapon(weapon, out var oldWeapon);
+        _weaponManager.TakeWeapon(weapon, out var oldWeapon);
         if (oldWeapon is null || _inventory.TryAdd(oldWeapon))
             return true;
         
-        weaponManager.TakeWeapon(oldWeapon, out _);
+        _weaponManager.TakeWeapon(oldWeapon, out _);
         return false;
     }
     
     public bool TryLayDownWeapon()
     {
-        weaponManager.LayDownWeapon(out var oldWeapon);
+        _weaponManager.LayDownWeapon(out var oldWeapon);
         if (oldWeapon is null || _inventory.TryAdd(oldWeapon))
             return true;
         
-        weaponManager.TakeWeapon(oldWeapon, out _);
+        _weaponManager.TakeWeapon(oldWeapon, out _);
         return false;
     }
 
     public bool TryEquipProtection(IProtection protection)
     {
-        protectionManager.EquipProtection(protection, out var oldProtection);
+        _protectionManager.EquipProtection(protection, out var oldProtection);
         if (oldProtection is null || _inventory.TryAdd(oldProtection))
             return true;
         
-        protectionManager.EquipProtection(oldProtection, out _);
+        _protectionManager.EquipProtection(oldProtection, out _);
         return false;
     }
 
     public bool TryUnEquipProtection(ProtectionSlot slot)
     {
-        protectionManager.UnEquipProtection(slot, out var oldProtection);
+        _protectionManager.UnEquipProtection(slot, out var oldProtection);
         if (oldProtection is null || _inventory.TryAdd(oldProtection))
             return true;
         
-        protectionManager.EquipProtection(oldProtection, out _);
+        _protectionManager.EquipProtection(oldProtection, out _);
         return false;
+    }
+    
+    private void AddXp(int xp) 
+        => _experienceSystem.AddExperience(xp);
+
+    private void Upgrade()
+    {
+        BaseDamage += BaseDamage / 10;
+        _healthScale.IncreaseScale(_healthScale.MaxValue / 10);
     }
 }

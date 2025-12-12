@@ -18,6 +18,7 @@ public static class Program
         Player player = new PlayerBuilder()
             .SetBaseDamage(10)
             .SetHealthScale(new Scale(1000, 1000))
+            .SetExperienceSystem(new ExperienceSystem(new Scale(10, 0)))
             .SetWeaponManager(new WeaponManager())
             .SetInventory(new Inventory(new Scale(5, 0)))
             .SetProtectionManager(new ProtectionManager())
