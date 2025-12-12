@@ -7,9 +7,4 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
-    <ItemGroup>
-      <Folder Include="App\DTOs\" />
-      <Folder Include="App\Services\" />
-    </ItemGroup>
-
 </Project>

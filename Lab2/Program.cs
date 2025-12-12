@@ -1,4 +1,5 @@
 ﻿using Lab2.Core.Enums;
+using Lab2.Core.Interfaces;
 using Lab2.Core.Models;
 
 namespace Lab2;
@@ -7,19 +8,45 @@ public static class Program
 {
     public static void Main()
     {
+        IItem item1 = new Armor("Броня броненосца", 120);
+        IItem item2 = new Pants("Штаны обыкновенные", 1);
+        IItem item3 = new Sword("Меч-леденец", 100);
+        IItem item4 = new Gun("Просто пушка", 1000);
+        IItem item5 = new Potion("Зелье от всех проблем", 100);
+        IItem item6 = new Food("Пельмени", 1000);
         
-        Player player = new Player("Bill", 100, 10, 
-            new Inventory(100),  new EquipmentManager());
-        Item sword = new Weapon("Sword", 100, 20, EquipmentSlot.MainHand);
-        Item sword2 = new Weapon("Sword2", 10, 20, EquipmentSlot.MainHand);
-        Item shield = new Protection("Shield", 10, 13, EquipmentSlot.OffHand);
-        Item potion = new Food("Potion", 1, 10);
-        player.TryPickUpItem(sword);
-        player.TryEquipItemFromInventory(sword.Id);
-        player.TryPickUpItem(shield);
-        player.TryPickUpItem(potion);
-        player.TryPickUpItem(sword2);
-        player.TryEquipItemFromInventory(sword2.Id);
-        Console.WriteLine(player);
+        Player player1 = new PlayerBuilder()
+            .SetHealthScale(new Scale(1000, 1000))
+            .SetWeaponManager(new WeaponManager())
+            .SetProtectionManager(new ProtectionManager())
+            .Build();
+        
+        PlayerInGame playerInGame1 = new PlayerInGame(player1, new Inventory(new Scale(5, 0)));
+        
+        Player player2 = new PlayerBuilder()
+            .SetHealthScale(new Scale(1000, 1000))
+            .SetWeaponManager(new WeaponManager())
+            .SetProtectionManager(new ProtectionManager())
+            .Build();
+        
+        PlayerInGame playerInGame2 = new PlayerInGame(player2, new Inventory(new Scale(5, 0)));
+
+        playerInGame1.TryPickUpItem(item1);
+        playerInGame1.TryPickUpItem(item2);
+        playerInGame1.TryPickUpItem(item3);
+        playerInGame1.TryPickUpItem(item4);
+        playerInGame1.TryPickUpItem(item5);
+        
+        playerInGame2.TryPickUpItem(item1);
+        playerInGame2.TryPickUpItem(item2);
+        playerInGame2.TryPickUpItem(item3);
+        playerInGame2.TryPickUpItem(item4);
+        playerInGame2.TryPickUpItem(item6);
+        
+        playerInGame1.TryDropItem(item1.Id, out _);
+        playerInGame1.TryDropItem(item3.Id, out _);
+
+        playerInGame1.TryUseItem(item4.Id);
+        playerInGame1.TryUseItem(item3.Id);
     }
 }
